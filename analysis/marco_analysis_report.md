@@ -165,7 +165,7 @@ This explains why:
 
 ## Differential Expression: MARCO+ vs MARCO- Myeloid Cells
 
-DE analysis was performed on 4 datasets with sufficient MARCO+ cells (Wilcoxon rank-sum, padj < 0.05, |logFC| > 0.25). Full methods in [methodology.md](methodology.md). Scripts: [`marco_de_pathways.py`](../../analysis/marco_de_pathways.py).
+DE analysis was performed on 4 datasets with sufficient MARCO+ cells (Wilcoxon rank-sum, padj < 0.05, |logFC| > 0.25). Full methods in [methodology.md](methodology.md). Scripts: [`marco_de_pathways.py`](../scripts/python/marco_de_pathways.py).
 
 ### DE Summary by Dataset
 
@@ -271,6 +271,187 @@ MARCO+ myeloid cells in the colon have a distinct transcriptional profile:
 5. **Inflammation-inducible in mice**: The dramatic D12 DSS spike with co-upregulation of Saa3, Il1b, Cxcl9/10, and Lcn2 indicates Marco marks acutely recruited inflammatory myeloid cells during colitis, with rapid resolution by D30.
 
 6. **Tissue-layer specificity**: Low MARCO in lamina propria datasets (SCP259) vs higher in datasets capturing muscularis (Gut Atlas LYVE1+ macrophages) is consistent with Domanska et al. 2022's finding that MARCO+ macrophages reside in the muscularis propria.
+
+---
+
+## Ontogeny Analysis: Yolk Sac vs Monocyte-Derived
+
+MARCO+ myeloid cells were scored for established ontogeny markers to determine whether they originate from embryonic (yolk sac) tissue-resident macrophages or bone marrow-derived monocytes. Script: [`marco_de_pathways.py`](../scripts/python/marco_de_pathways.py).
+
+### Marker Panels Used
+
+- **Yolk sac / tissue-resident**: LYVE1, FOLR2, TIMD4, CX3CR1, CSF1R, MRC1, CD163, MAF, MERTK, C1QA/B/C, VSIG4
+- **Monocyte-derived**: CCR2, CD14, S100A8/A9, FCN1, VCAN, SELL, PLAC8, CLEC12A, LST1
+- **Peritoneal macrophage**: GATA6, TGFB2, RARRES2, F5, VSIG4, ARG1, ICAM2
+
+### Results by Dataset
+
+**Gut Atlas (normal human colon) — Mixed/transitional signature:**
+- Tissue-resident markers UP: LYVE1 (p=0.019), FOLR2 (p=5.8e-4), CD163 (p=1.9e-12), MAFB (p=7.0e-9)
+- Monocyte markers also UP: CD14 (p=2.3e-6), S100A8/A9 (p<1e-9), FCN1 (p=4.4e-11), VCAN (p=4.4e-10)
+- C1QA/B/C: unchanged (not significantly different)
+- **Interpretation**: MARCO+ cells in the normal colon are tissue-resident macrophages (LYVE1+/FOLR2+/CD163+) that retain some monocyte-recruitment markers, consistent with a population that was monocyte-derived but has adapted to the tissue niche
+
+**SCP1845 (multi-organ) — Clearly tissue-resident:**
+- Tissue-resident markers strongly UP: MRC1 (p≈0), CD163 (p≈0), C1QA/B/C (p≈0), VSIG4 (p≈0), TIMD4 (p=1.9e-15), MAF (p≈0)
+- Monocyte markers strongly DOWN: CCR2 (p=3.9e-80), S100A8/A9 (p≈0), FCN1 (p≈0), VCAN (p≈0), SELL (p≈0)
+- **Interpretation**: Dominated by alveolar macrophages (lung), which are embryonically-derived tissue-resident macrophages. Across organs, MARCO marks the most mature, tissue-adapted macrophage population.
+
+**SCP259 (UC colon) — Clearly monocyte-derived:**
+- Monocyte markers massively UP: S100A8 (logFC=+15.9, p=4.1e-87), S100A9 (logFC=+20.2, p=2.7e-111), FCN1 (p=4.0e-85), VCAN (p=1.5e-40), SELL (p=2.1e-7), PLAC8 (p=8.3e-13)
+- Tissue-resident markers DOWN: C1QA (logFC=-9.5, p=9.1e-46), C1QB (logFC=-7.6, p=1.4e-40), C1QC (logFC=-6.5, p=1.3e-38), MAF (p=9.1e-5), VSIG4 (p=1.9e-4), SEPP1 (p=7.9e-40)
+- **Interpretation**: In UC, MARCO+ cells are recently recruited inflammatory monocytes that have not yet acquired tissue-resident identity. This is the classic monocyte waterfall — blood monocytes entering inflamed tissue.
+
+### Peritoneal Macrophage Origin
+
+**No evidence of peritoneal origin in any dataset:**
+- GATA6 (canonical peritoneal TF): not expressed or not significant across all datasets
+- TGFB2: absent or negative
+- RARRES2: absent or negative
+- ARG1: absent
+- MARCO+ colon macrophages are definitively **not** peritoneal macrophages
+
+### Context-Dependent Ontogeny Summary
+
+| Context | MARCO+ identity | Key evidence |
+|---|---|---|
+| Normal colon (Gut Atlas) | Tissue-resident with monocyte traces | LYVE1+/FOLR2+/CD163+ but also S100A8/A9+/FCN1+ |
+| Multi-organ steady-state (SCP1845) | Mature tissue-resident | C1Q+++, MRC1+++, CCR2---, S100A8/A9--- |
+| UC colon (SCP259) | Recently recruited monocytes | S100A8/A9+++, FCN1+++, C1Q---, MAF--- |
+| DSS colitis D12 (SCP2771) | Acute inflammatory infiltrate | Saa3+++, Il1b+++, Cxcl9/10+++ |
+
+---
+
+## Inflammatory Polarization
+
+### Marker Panels Used
+
+- **Pro-inflammatory**: IL1B, IL6, TNF, CXCL2/3/8/10, CCL2/3/4, S100A8/A9, NFKBIA, NLRP3, SOD2, TLR2/4, NOS2
+- **Anti-inflammatory / M2**: IL10, TGFB1, MRC1, CD163, MSR1, FOLR2, IGF1, LYVE1, MERTK, AXL, STAB1, MAF, MAFB, NR4A1/2/3, PPARG, APOE, C1QA/B/C
+
+### Polarization by Dataset
+
+**Normal colon (Gut Atlas) — Pro-inflammatory lean with tissue-resident features:**
+- Pro-inflammatory significantly UP: S100A8/A9, CXCL2/3, CCL3/4, NLRP3, TLR2, SOD2, NFKBIA
+- Anti-inflammatory UP: CD163, FOLR2, LYVE1, MAFB
+- Anti-inflammatory DOWN: IGF1 (p=0.022), AXL (p=0.023)
+- **Verdict**: Mixed — scavenger/inflammatory cells with some homeostatic features
+
+**Multi-organ (SCP1845) — Anti-inflammatory / homeostatic:**
+- Anti-inflammatory strongly UP: MRC1 (p≈0), CD163 (p≈0), MSR1 (p≈0), C1QA/B/C (p≈0), APOE (p≈0), PPARG (p≈0), AXL (p≈0), MAF (p≈0), NR4A1/2/3 (p≈0)
+- Pro-inflammatory mixed: IL1B/IL6/TNF up, but S100A8/A9 strongly DOWN, NLRP3 DOWN, SOD2 DOWN
+- **Verdict**: Predominantly anti-inflammatory, mature tissue-resident macrophages
+
+**UC colon (SCP259) — Pro-inflammatory:**
+- Pro-inflammatory UP: S100A8/A9 (massively), FCN1, VCAN
+- Anti-inflammatory DOWN: IGF1 (p=9.8e-9), AXL (p=3.8e-4), STAB1 (p=9.9e-8), MAF (p=9.1e-5), NR4A2 (p=5.9e-5), NR4A3 (p=2.7e-6), APOE (p=6.7e-19), C1QA/B/C (p<1e-38)
+- Notably: IL1B is actually slightly DOWN, and CCL3/CCL4 are DOWN — suggesting these are early-stage monocytes not yet fully activated
+- **Verdict**: Pro-inflammatory monocyte identity, but not yet producing classical cytokines — consistent with recently extravasated cells
+
+**DSS colitis D12 (SCP2771) — Acutely pro-inflammatory:**
+- Massively UP: Saa3, S100a8/a9, Il1b, Cxcl9/10, Lcn2, Socs3
+- **Verdict**: Peak acute inflammation signature
+
+### Polarization Summary
+
+| Context | Polarization | Character |
+|---|---|---|
+| Normal colon | Mixed | Tissue-resident scavenger with inflammatory capacity |
+| Multi-organ steady-state | Anti-inflammatory | Mature homeostatic macrophages |
+| UC colon | Pro-inflammatory | Recently recruited monocytes, not yet cytokine-producing |
+| DSS colitis peak | Acutely pro-inflammatory | Full inflammatory activation |
+
+MARCO+ cells do not fit the classical M1/M2 dichotomy. Their polarization is **context-dependent**: homeostatic in steady-state tissue, but marking recruited inflammatory monocytes during disease.
+
+---
+
+## Pseudotime Analysis
+
+Diffusion pseudotime (DPT) was computed on myeloid cells to trace monocyte-to-macrophage differentiation and locate MARCO+ cells along the trajectory. Script: [`marco_pseudotime.py`](../scripts/python/marco_pseudotime.py).
+
+### Method
+- Scanpy DPT with diffusion maps (10 components)
+- Root cell selected from monocytes (lowest MARCO expression)
+- Pseudotime binned into deciles for MARCO expression tracking
+- Mann-Whitney U test comparing MARCO+ vs MARCO- pseudotime distributions
+
+### Gut Atlas (Normal Human Colon, 662 myeloid cells)
+
+**MARCO peaks early in pseudotime — at the monocyte stage:**
+
+| Pseudotime bin | Mean PT | N cells | % MARCO+ |
+|---|---|---|---|
+| 0 (earliest) | 0.017 | 67 | **37.3%** |
+| 1 | 0.047 | 66 | **30.3%** |
+| 2 | 0.136 | 66 | 15.2% |
+| 3 | 0.168 | 66 | 4.5% |
+| 4 | 0.176 | 66 | 0.0% |
+| 5 | 0.195 | 66 | 4.5% |
+| 6-7 | 0.236-0.255 | 132 | 13.6-16.7% |
+| 8 | 0.269 | 66 | **22.7%** |
+| 9 (latest) | 0.421 | 67 | 3.0% |
+
+**Cell type ordering**: Monocyte (PT=0.073) → Macrophage (0.171) → cycling DCs (0.187) → cDC2 (0.200) → LYVE1 Macrophage (0.240) → cDC1 (0.254) → pDC (0.952)
+
+- MARCO+ mean PT = 0.136 vs MARCO- mean PT = 0.202 (p=1.98e-5)
+- MARCO is bimodal: high in early monocytes AND in LYVE1 macrophages (PT bin 8), with a gap in between
+- This suggests two distinct MARCO+ populations: recently arrived monocytes and fully differentiated tissue-resident macrophages
+
+### SCP1845 Gut Myeloid (1,081 cells from gut organs)
+
+**Cell type ordering**: Classical monocytes (PT=0.173) → Intermediate macrophages (0.219) → Nonclassical monocytes (0.269) → DC2 (0.450) → Intestinal macrophages (0.472) → DC1 (0.479) → Erythrophagocytic macrophages (0.497) → Alveolar macrophages (0.712)
+
+| Cell Type | Mean PT | % MARCO+ |
+|---|---|---|
+| Classical monocytes | 0.173 | **34.3%** |
+| Nonclassical monocytes | 0.269 | **45.5%** |
+| Intermediate macrophages | 0.219 | 33.3% |
+| Intestinal macrophages | 0.472 | 4.6% |
+| Alveolar macrophages | 0.712 | **45.2%** |
+
+- MARCO+ mean PT = 0.423 vs MARCO- mean PT = 0.456 (p=1.33e-5)
+- MARCO is again **bimodal**: high at the monocyte entry point AND at the terminally differentiated tissue-resident macrophage endpoint
+- Intestinal macrophages (mid-trajectory) have the lowest MARCO — consistent with monocyte waterfall model where cells lose monocyte markers before acquiring tissue-resident identity
+
+### SCP259 (UC Colon, 21,513 myeloid cells)
+
+**MARCO+ cells are late in pseudotime — the opposite of normal colon:**
+
+| Pseudotime bin | Mean PT | N cells | % MARCO+ |
+|---|---|---|---|
+| 0-3 (early) | 0.04-0.13 | 8,605 | 0.1-0.5% |
+| 4-5 (mid) | 0.18-0.23 | 4,303 | 0.2-0.8% |
+| 6 | 0.358 | 2,151 | **4.3%** |
+| 7 | 0.736 | 2,151 | **7.9%** |
+| 8 | 0.838 | 2,151 | **6.1%** |
+| 9 (latest) | 0.891 | 2,152 | **4.0%** |
+
+**Cell type ordering**: Cycling Monocytes (PT=0.095) → DC2 (0.270) → DC1 (0.307) → Macrophages (0.359) → Inflammatory Monocytes (0.573)
+
+- MARCO+ mean PT = 0.670 vs MARCO- mean PT = 0.352 (p=3.01e-93, highly significant)
+- In UC, MARCO marks **late-stage inflammatory monocytes**, not early arrivals
+- Inflammatory Monocytes are the latest cell type (PT=0.573) and have the highest MARCO+ rate (7.7%)
+
+**MARCO+ pseudotime by disease status:**
+
+| Health | N MARCO+ | Mean PT | Median PT |
+|---|---|---|---|
+| Healthy | 12 | 0.154 | 0.114 |
+| Non-inflamed | 254 | 0.680 | 0.762 |
+| Inflamed | 260 | 0.684 | 0.813 |
+
+- In healthy tissue, the few MARCO+ cells are early (monocyte-like, PT=0.15)
+- In UC tissue (both inflamed and non-inflamed), MARCO+ cells are late (PT=0.68) — consistent with disease-recruited inflammatory monocytes that have progressed through differentiation
+
+### Pseudotime Interpretation
+
+The pseudotime analysis reveals that MARCO expression follows a **context-dependent trajectory pattern**:
+
+1. **Normal colon**: MARCO is bimodal — expressed by incoming monocytes (early PT) and by terminally differentiated tissue-resident LYVE1+ macrophages (late PT), with a gap during the intermediate macrophage differentiation stage. This matches the "monocyte waterfall" model where cells transiently lose monocyte identity before acquiring tissue-resident features.
+
+2. **UC colon**: MARCO shifts to marking only **late-stage inflammatory monocytes** (high PT). The bimodal pattern collapses — there is no tissue-resident MARCO+ peak, only the inflammatory endpoint. This suggests that in disease, MARCO marks monocytes that have been activated/differentiated within the inflamed tissue rather than homeostatic tissue-resident macrophages.
+
+3. **Gut myeloid (SCP1845)**: Confirms the bimodal pattern with MARCO highest in classical monocytes (entry) and alveolar/tissue-resident macrophages (endpoint), lowest in mid-trajectory intestinal macrophages.
 
 ---
 

@@ -10,8 +10,9 @@ This document describes exactly how each analysis was performed, which datasets 
 
 | Script | Purpose | Output Files |
 |---|---|---|
-| [`analysis/marco_expression.py`](../marco_expression.py) | Phase 1-3: Gene detection, expression extraction, cell-type/disease/spatial summaries | `marco_all_datasets_summary.csv`, `scp2771_marco_spatial.csv` |
-| [`analysis/marco_de_pathways.py`](../marco_de_pathways.py) | DE analysis (MARCO+ vs MARCO-) and GO/KEGG pathway enrichment | `*_marco_de_results.csv`, `*_marco_enrichment.csv` |
+| [`scripts/python/marco_expression.py`](../scripts/python/marco_expression.py) | Phase 1-3: Gene detection, expression extraction, cell-type/disease/spatial summaries | `marco_all_datasets_summary.csv`, `scp2771_marco_spatial.csv` |
+| [`scripts/python/marco_de_pathways.py`](../scripts/python/marco_de_pathways.py) | DE analysis (MARCO+ vs MARCO-) and GO/KEGG pathway enrichment | `*_marco_de_results.csv`, `*_marco_enrichment.csv` |
+| [`scripts/python/marco_pseudotime.py`](../scripts/python/marco_pseudotime.py) | Diffusion pseudotime on myeloid cells | `*_pseudotime.csv` |
 
 ---
 
@@ -136,4 +137,7 @@ This document describes exactly how each analysis was performed, which datasets 
 | `scp259_marco_de_results.csv` | Full DE table: SCP259 UC myeloid MARCO+ vs MARCO- |
 | `scp259_marco_enrichment.csv` | GO/KEGG enrichment: SCP259 |
 | `scp2771_d12_marco_de_results.csv` | Full DE table: SCP2771 D12 Marco+ vs Marco- spots |
+| `gut_atlas_pseudotime.csv` | Pseudotime + UMAP + MARCO for Gut Atlas myeloid cells |
+| `scp1845_gut_pseudotime.csv` | Pseudotime + UMAP + MARCO for SCP1845 gut myeloid cells |
+| `scp259_pseudotime.csv` | Pseudotime + UMAP + MARCO for SCP259 UC myeloid cells |
 | `methodology.md` | This file |

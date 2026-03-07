@@ -7,8 +7,8 @@ data/single-cell-portal/
 *.h5ad
 
 # Analysis output (large files only)
-analysis/results/*.png
-analysis/results/*.pdf
+analysis/*.png
+analysis/*.pdf
 
 # OS
 .DS_Store
