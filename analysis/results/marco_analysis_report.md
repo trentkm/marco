@@ -163,6 +163,117 @@ This explains why:
 6. **Disease relevance**: MARCO is elevated in UC tissue and spikes during DSS colitis peak — suggesting MARCO marks inflammation-recruited or -activated myeloid cells
 7. **No prior papers** in this analysis explicitly discussed MARCO, but Domanska et al. 2022 provides the key biological framework
 
+## Differential Expression: MARCO+ vs MARCO- Myeloid Cells
+
+DE analysis was performed on 4 datasets with sufficient MARCO+ cells (Wilcoxon rank-sum, padj < 0.05, |logFC| > 0.25). Full methods in [methodology.md](methodology.md). Scripts: [`marco_de_pathways.py`](../../analysis/marco_de_pathways.py).
+
+### DE Summary by Dataset
+
+| Dataset | Myeloid cells | MARCO+ | MARCO- | Sig. UP | Sig. DOWN |
+|---|---|---|---|---|---|
+| Gut Atlas | 662 | 98 | 564 | 162 | 73 |
+| SCP1845 | 50,082 | 25,303 | 24,779 | 5,921 | 1,649 |
+| SCP259 | 21,513 | 526 | 20,987 | 389 | 155 |
+| SCP2771 (D12 spots) | 3,495 | 315 | 3,180 | 3,324 | 213 |
+
+### Consistently Co-upregulated with MARCO
+
+| Gene | Function | Datasets Found |
+|---|---|---|
+| **S100A8/A9** | Calprotectin (alarmin, inflammation) | Gut Atlas, SCP259, SCP2771 |
+| **FCN1** | Ficolin-1 (innate immunity, complement) | Gut Atlas, SCP259 |
+| **CD163** | Hemoglobin scavenger receptor (M2 macrophage marker) | Gut Atlas, SCP1845 |
+| **VCAN** | Versican (ECM, monocyte recruitment) | Gut Atlas, SCP259 |
+| **TYROBP/DAP12** | Myeloid signaling adaptor | Gut Atlas, SCP259, SCP2771 |
+| **C5AR1** | Complement C5a receptor | Gut Atlas |
+| **MSR1** | Scavenger receptor A (CD204) | SCP1845 |
+| **MRC1/CD206** | Mannose receptor (M2 macrophage marker) | SCP1845 |
+| **TSPO** | Translocator protein (inflammation) | Gut Atlas, SCP259 |
+| **SERPINA1** | Alpha-1 antitrypsin | Gut Atlas, SCP259 |
+| **EMP3** | Epithelial membrane protein 3 | Gut Atlas, SCP259 |
+| **Il1b** | Pro-inflammatory cytokine | SCP2771 (mouse, D12) |
+| **Cxcl9/Cxcl10** | IFN-γ-induced chemokines | SCP2771 (mouse, D12) |
+| **Saa3** | Serum amyloid A3 (acute phase) | SCP2771 (mouse, D12) |
+
+### Consistently Downregulated in MARCO+ Cells
+
+| Gene | Function | Datasets Found |
+|---|---|---|
+| **HLA-DRA, HLA-DRB1, HLA-DPA1, HLA-DQA1** etc. | MHC class II (antigen presentation) | Gut Atlas, SCP259, SCP1845 |
+| **C1QA/B/C** | Complement C1q subunits | SCP259 |
+| **DNASE1L3** | DNase I-like 3 | Gut Atlas, SCP259 |
+| **IGF1** | Insulin-like growth factor 1 | Gut Atlas, SCP259 |
+| **RGS1** | Regulator of G-protein signaling 1 | Gut Atlas, SCP259 |
+| **SLC40A1/Ferroportin** | Iron exporter | Gut Atlas, SCP259 |
+| **FCER1A** | IgE receptor alpha (DC marker) | Gut Atlas, SCP1845 |
+| **PLD4** | Phospholipase D4 (pDC marker) | Gut Atlas, SCP1845 |
+
+---
+
+## Pathway Enrichment
+
+### Upregulated in MARCO+ Cells
+
+**GO Biological Process:**
+- Inflammatory Response (GO:0006954) — all datasets
+- Response to Lipopolysaccharide (GO:0032496) — Gut Atlas, SCP259
+- Phagocytosis (GO:0006909) — Gut Atlas (MARCO itself part of this term)
+- Granulocyte/Neutrophil Chemotaxis — Gut Atlas, SCP259
+- Cytoplasmic Translation — SCP259, SCP1845 (ribosomal program)
+- Mitochondrial Translation / Cellular Respiration — SCP1845 (metabolically active cells)
+
+**KEGG Pathways:**
+- Phagosome — Gut Atlas, SCP259
+- NF-κB Signaling Pathway — Gut Atlas, SCP259
+- Ferroptosis — Gut Atlas
+- Lysosome — Gut Atlas
+- Complement and Coagulation Cascades — Gut Atlas
+- Tuberculosis — Gut Atlas, SCP259
+
+**GO Molecular Function:**
+- RAGE Receptor Binding — Gut Atlas, SCP259 (S100A8/A9/A12 → RAGE axis)
+- Amyloid-Beta Binding — Gut Atlas (MARCO, ITGAM, LRP1, TLR2)
+- Endopeptidase Inhibitor Activity — Gut Atlas, SCP259
+
+**GO Cellular Component:**
+- Secretory Granule Membrane — Gut Atlas, SCP259
+- Ficolin-1-Rich Granule — Gut Atlas, SCP259
+- Tertiary Granule — Gut Atlas, SCP259
+
+### Downregulated in MARCO+ Cells
+
+**GO Biological Process:**
+- MHC Class II Protein Complex Assembly — dominant signal across all datasets
+- Antigen Processing and Presentation via MHC Class II — all datasets
+- Immunoglobulin Mediated Immune Response — Gut Atlas
+- Cytoplasmic Translation (ribosomal subunits) — Gut Atlas downregulated set
+
+**KEGG Pathways:**
+- Antigen Processing and Presentation — all datasets
+- Inflammatory Bowel Disease — Gut Atlas (driven by MHC-II downregulation)
+- Intestinal Immune Network for IgA Production — Gut Atlas
+- Th1 and Th2 Cell Differentiation — Gut Atlas
+
+---
+
+## Biological Interpretation
+
+MARCO+ myeloid cells in the colon have a distinct transcriptional profile:
+
+1. **Pro-inflammatory and phagocytic**: High S100A8/A9 (calprotectin), active NF-κB/LPS response pathways, ficolin-rich granules, and phagosome genes. This aligns with MARCO's known role as a pattern recognition receptor for bacterial clearance.
+
+2. **Reduced antigen presentation**: Strong downregulation of MHC class II genes (HLA-DR, HLA-DQ, HLA-DP families) suggests MARCO+ cells are less engaged in adaptive immune priming. This is consistent with recently recruited inflammatory monocytes vs tissue-resident antigen-presenting macrophages.
+
+3. **M2-like but inflammatory**: Co-expression with CD163 and MRC1 (classical M2 markers) alongside S100A8/A9 and IL1B (classical M1 markers) suggests MARCO+ cells don't fit neatly into M1/M2 polarization — they may represent a transitional or mixed-phenotype population.
+
+4. **Metabolically active**: In SCP1845, MARCO+ cells show upregulated mitochondrial translation and oxidative phosphorylation, suggesting high metabolic demands (consistent with active phagocytosis).
+
+5. **Inflammation-inducible in mice**: The dramatic D12 DSS spike with co-upregulation of Saa3, Il1b, Cxcl9/10, and Lcn2 indicates Marco marks acutely recruited inflammatory myeloid cells during colitis, with rapid resolution by D30.
+
+6. **Tissue-layer specificity**: Low MARCO in lamina propria datasets (SCP259) vs higher in datasets capturing muscularis (Gut Atlas LYVE1+ macrophages) is consistent with Domanska et al. 2022's finding that MARCO+ macrophages reside in the muscularis propria.
+
+---
+
 ## References
 
 1. Smillie CS et al. Cell. 2019;178(3):714-730. DOI: 10.1016/j.cell.2019.06.029
