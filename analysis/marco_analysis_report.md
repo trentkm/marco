@@ -138,6 +138,96 @@ Very low overall, but FMT shows ~3x higher Marco+ rate vs SPF — potentially su
 
 ---
 
+## Spatial Neighborhood Analysis (SCP2771 — Visium DSS Colitis)
+
+Spatial nearest-neighbor analysis of Marco+ Visium spots at D12 (peak inflammation). For each Marco+ spot, its 6 nearest neighbors (matching the Visium hexagonal grid) were identified using a KD-tree on X/Y coordinates. Script: [`marco_spatial_neighbors.py`](../scripts/python/marco_spatial_neighbors.py).
+
+### Spatial Cluster Enrichment
+
+Marco+ spots are overwhelmingly concentrated in **Cluster 10** (38.1% of Marco+ spots vs 6.8% of all D12 spots = **5.55x enrichment**). Cluster 3 is also mildly enriched (1.54x). Clusters 6 (0.22x) and 2 (0.34x) are strongly depleted near Marco+ spots.
+
+| Cluster | % of Marco+ spots | % of all D12 | Enrichment |
+| ------- | ----------------- | ------------ | ---------- |
+| **10**  | 38.1%             | 6.8%         | **5.55x**  |
+| **3**   | 14.9%             | 9.6%         | **1.54x**  |
+| 8       | 20.3%             | 20.1%        | 0.98x      |
+| 7       | 14.3%             | 22.7%        | 0.66x      |
+| 6       | 5.7%              | 26.2%        | **0.22x**  |
+| 2       | 2.5%              | 7.9%         | **0.34x**  |
+
+### What's Spatially Adjacent to Marco+ Spots
+
+DE analysis comparing the 822 immediate neighbor spots of Marco+ spots vs 2,358 distant spots (Mann-Whitney U, BH-corrected):
+
+**Top genes enriched in Marco+ neighbors (most spatially co-localized):**
+
+| Gene | Neighbors % | Distant % | Fold change | Function |
+|---|---|---|---|---|
+| **Ifng** | 9.6% | 2.3% | **13.8x** | IFN-γ — key activator of macrophages |
+| **Mmp13** | 42.7% | 22.8% | 8.75x | Matrix metalloproteinase — tissue remodeling |
+| **Il22** | 4.4% | 0.5% | — | Epithelial repair cytokine |
+| **Il11** | 31.9% | 11.6% | — | Pro-fibrotic cytokine |
+| **Cxcl10** | 48.1% | 28.2% | — | IFN-γ-induced chemokine |
+| **Il1a** | 15.9% | 4.5% | — | Alarmin |
+| **Cxcl1** | 26.2% | 7.5% | — | Neutrophil chemoattractant |
+| **Acod1** | 25.4% | 8.0% | — | Itaconate pathway (immunometabolism) |
+| **Il1b** | 59.4% | 36.3% | **6.8x** | Pro-inflammatory cytokine |
+| **Il6** | 9.5% | 2.4% | **7.1x** | Pleiotropic inflammatory cytokine |
+| **Mmp10** | 50.4% | 24.8% | 6.8x | Matrix metalloproteinase |
+| **Tnf** | 18.0% | 9.9% | 3.0x | TNF-α |
+
+**Genes depleted near Marco+ spots (absent from the neighborhood):**
+
+| Gene | Neighbors % | Distant % | Function |
+|---|---|---|---|
+| Fabp6 | 16.3% | 30.2% | Bile acid binding (mature enterocyte) |
+| Muc2 (Mptx1) | 2.1% | 5.3% | Goblet cell |
+| Slc13a1 | 9.9% | 18.0% | Solute carrier (absorptive epithelium) |
+| Cyp3a44/25 | 2.7-6.3% | 6.4-11.7% | Cytochrome P450 (metabolic epithelium) |
+
+### Cell Type Marker Analysis in Spatial Neighborhoods
+
+| Cell lineage | Key marker | Marco+ spots | Neighbors | Distant | Neighbor/Distant ratio |
+|---|---|---|---|---|---|
+| **Neutrophils** | S100a9 | 94.0% | 84.1% | 62.0% | **4.65x** |
+| | Cxcr2 | 22.5% | 7.5% | 1.9% | **4.80x** |
+| **Myeloid** | Cd14 | 75.2% | 52.6% | 38.5% | **2.84x** |
+| | Ly6c2 | 24.4% | 12.0% | 4.5% | **3.14x** |
+| | Ccr2 | 33.0% | 19.0% | 8.9% | **2.55x** |
+| **T cells** | Il17a | 12.4% | 2.9% | 0.7% | **5.57x** |
+| | Ifng | 22.5% | 9.6% | 2.3% | **13.8x** |
+| | Foxp3 | 5.1% | 1.5% | 0.8% | 1.72x |
+| **Stroma** | Col3a1 | 96.2% | 93.2% | 83.7% | 1.61x |
+| | Vim | 75.2% | 68.6% | 46.8% | **2.00x** |
+| **Endothelial** | Pecam1 | 46.7% | 33.2% | 20.6% | **2.00x** |
+| **Epithelial** | Epcam | 95.9% | 95.4% | 96.6% | 1.03x |
+| | Cdx2 | 47.3% | 59.1% | 62.1% | 0.86x |
+| **Tissue remodeling** | Mmp9 | 51.7% | 25.7% | 10.4% | **3.48x** |
+| | Mmp13 | 69.2% | 42.7% | 22.8% | **8.75x** |
+| | Timp1 | 76.2% | 59.2% | 32.2% | **2.39x** |
+| **Scavenger receptors** | Msr1 | 36.8% | 16.7% | 7.6% | **2.92x** |
+| | Colec12 | 28.6% | 26.9% | 16.5% | 1.64x |
+| **Tissue-resident** | Lyve1 | 7.9% | 6.0% | 3.6% | 1.37x |
+| | Timd4 | 2.2% | 2.1% | 1.1% | 1.82x |
+
+### Spatial Interpretation
+
+Marco+ spots at D12 sit within a **highly inflammatory niche** characterized by:
+
+1. **IFN-γ signaling hub**: Ifng is 13.8x enriched in the neighborhood — the strongest spatial signal. This suggests Marco+ macrophages are adjacent to IFN-γ-producing T cells (Th1 and/or CD8+). Il17a is also spatially enriched (5.6x), indicating a mixed Th1/Th17 environment.
+
+2. **Neutrophil co-localization**: S100a8/a9 and Cxcr2 are strongly enriched (4-5x), indicating Marco+ spots sit within or adjacent to neutrophil-rich inflammatory infiltrates.
+
+3. **Active tissue destruction**: MMP9, MMP10, MMP13 are massively enriched (3.5-8.8x) — matrix metalloproteinases that degrade extracellular matrix. This places Marco+ macrophages at sites of active tissue remodeling/damage.
+
+4. **Monocyte recruitment zone**: Ccr2 and Ly6c2 are enriched in neighbors (2.5-3.1x), confirming ongoing monocyte influx around Marco+ spots.
+
+5. **Depleted epithelial maturity**: Absorptive enterocyte markers (Fabp6, Cyp3a, Slc13a1) are depleted — consistent with Marco+ spots being in areas of epithelial damage/loss rather than intact mucosa.
+
+6. **Low tissue-resident macrophage signature**: Lyve1, Timd4, Cx3cr1 are only mildly enriched or unchanged — the neighborhood is dominated by infiltrating cells, not resident macrophages.
+
+---
+
 ## Key Biological Context
 
 **Domanska et al., *J Exp Med*, 2022** (DOI: 10.1084/jem.20211846) provides the most relevant biological context for MARCO in the colon:

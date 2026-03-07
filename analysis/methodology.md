@@ -13,6 +13,7 @@ This document describes exactly how each analysis was performed, which datasets 
 | [`scripts/python/marco_expression.py`](../scripts/python/marco_expression.py) | Phase 1-3: Gene detection, expression extraction, cell-type/disease/spatial summaries | `marco_all_datasets_summary.csv`, `scp2771_marco_spatial.csv` |
 | [`scripts/python/marco_de_pathways.py`](../scripts/python/marco_de_pathways.py) | DE analysis (MARCO+ vs MARCO-) and GO/KEGG pathway enrichment | `*_marco_de_results.csv`, `*_marco_enrichment.csv` |
 | [`scripts/python/marco_pseudotime.py`](../scripts/python/marco_pseudotime.py) | Diffusion pseudotime on myeloid cells | `*_pseudotime.csv` |
+| [`scripts/python/marco_spatial_neighbors.py`](../scripts/python/marco_spatial_neighbors.py) | Spatial nearest-neighbor analysis of Marco+ Visium spots | `scp2771_spatial_neighbor_de.csv` |
 
 ---
 
@@ -208,6 +209,48 @@ Each pseudotime analysis produces a CSV file with one row per cell containing:
 - **SCP1845 gut subset is small**: Only 1,081 gut myeloid cells (vs 50,082 total myeloid across all organs). Some rare cell types (e.g., Intermediate macrophages, n=3) may not be reliably positioned on the trajectory.
 - **Visium spatial data (SCP2771) excluded**: Pseudotime was not computed on Visium spots because each spot captures ~5-10 cells. Pseudotime requires single-cell resolution to order individual cells along a trajectory.
 
+---
+
+## Spatial Neighborhood Analysis
+
+**Script**: [`scripts/python/marco_spatial_neighbors.py`](../scripts/python/marco_spatial_neighbors.py)
+**Dataset**: SCP2771 (Visium DSS colitis, mouse colon)
+
+### Rationale
+
+Visium spots capture ~5-10 cells each at ~55 μm resolution, arranged in a hexagonal grid. Each spot has 6 immediate spatial neighbors. This analysis asks: what is the local tissue microenvironment surrounding Marco+ spots?
+
+### Method
+
+1. **Data loading**: Expression matrix (MTX format), spatial coordinates (X, Y from cluster TSV), and metadata (including `dss_time_point` and spatial `Category`) were loaded and merged on shared barcodes.
+
+2. **Timepoint focus**: Analysis centered on D12 (peak DSS inflammation), with summary statistics computed for all timepoints (D0, D12, D30, D73).
+
+3. **KD-tree construction**: A `scipy.spatial.cKDTree` was built from the X/Y coordinates of all D12 spots. For each Marco+ spot, the K=6 nearest neighbors were queried (matching the Visium hexagonal grid geometry). Self-matches were excluded by querying K+1 neighbors and dropping the first result.
+
+4. **Cluster enrichment**: The spatial cluster category of each neighbor was tabulated and compared to the overall D12 cluster distribution. Enrichment was computed as observed_fraction / expected_fraction for each cluster.
+
+5. **Differential expression (neighbors vs distant)**:
+   - Spots were classified into three groups: Marco+ spots, neighbor spots (K=6 nearest neighbors of Marco+ spots, excluding Marco+ spots themselves), and distant spots (all remaining spots).
+   - For each gene, mean expression and percent-expressing were computed in each group.
+   - Mann-Whitney U test (two-sided) compared neighbor vs distant expression for genes expressed in >1% of either group.
+   - Log2 fold-change: `log2((mean_neighbor + 0.01) / (mean_distant + 0.01))` with pseudocount to avoid division by zero.
+   - Multiple testing correction: Benjamini-Hochberg FDR (`statsmodels.stats.multitest.multipletests`).
+   - Significance thresholds: adjusted p < 0.05 and |log2FC| > 0.5.
+
+6. **Marker category analysis**: Expression of curated marker gene lists (immune/myeloid, T cells, B cells, neutrophils, fibroblasts, epithelial, endothelial, tissue remodeling, inflammatory cytokines, scavenger receptors, yolk sac/tissue-resident markers) was compared across Marco+ spots, their neighbors, and distant spots using mean expression ratios.
+
+### Output
+
+`scp2771_spatial_neighbor_de.csv` — one row per tested gene with columns: `gene`, `mean_marco_spots`, `pct_marco_spots`, `mean_neighbors`, `pct_neighbors`, `mean_distant`, `pct_distant`, `log2fc_neighbor_vs_distant`, `pval`, `padj`.
+
+### Limitations
+
+- **Visium resolution**: Each spot captures multiple cells. "Marco+ spot" means a spot where Marco mRNA was detected, not necessarily a single Marco+ cell. Neighboring spots may contain Marco+ cells below detection threshold.
+- **K=6 fixed neighbors**: The hexagonal grid geometry dictates 6 immediate neighbors, but tissue architecture may mean biologically relevant neighborhoods extend further or are anisotropic.
+- **Single section**: Spatial relationships are derived from a 2D tissue section; 3D tissue architecture is not captured.
+- **DSS model specificity**: Findings are specific to DSS-induced colitis in mouse and may not directly translate to human UC.
+
 ### Software Versions
 - Python 3.9
 - scanpy 1.10.3
@@ -234,4 +277,5 @@ Each pseudotime analysis produces a CSV file with one row per cell containing:
 | `gut_atlas_pseudotime.csv` | Pseudotime + UMAP + MARCO for Gut Atlas myeloid cells |
 | `scp1845_gut_pseudotime.csv` | Pseudotime + UMAP + MARCO for SCP1845 gut myeloid cells |
 | `scp259_pseudotime.csv` | Pseudotime + UMAP + MARCO for SCP259 UC myeloid cells |
+| `scp2771_spatial_neighbor_de.csv` | Full DE table: Marco+ spot neighbors vs distant spots (Visium spatial) |
 | `methodology.md` | This file |
