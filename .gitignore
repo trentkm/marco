@@ -1,0 +1,14 @@
+# Large data files
+data/seurat/*.rds
+data/gut-atlas/*.h5ad
+data/single-cell-portal/
+*.mtx
+*.mtx.gz
+*.h5ad
+
+# Analysis output (large files only)
+analysis/results/*.png
+analysis/results/*.pdf
+
+# OS
+.DS_Store
