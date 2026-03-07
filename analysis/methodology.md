@@ -114,11 +114,105 @@ This document describes exactly how each analysis was performed, which datasets 
 - **Significance threshold**: Adjusted P-value < 0.05
 - **Mouse gene handling**: For SCP2771, mouse gene names were uppercased (e.g., Marco → MARCO) to query human gene set libraries
 
+### Pseudotime Analysis
+
+Diffusion pseudotime (DPT) was used to order myeloid cells along a monocyte-to-macrophage differentiation trajectory and determine where MARCO+ cells fall. Script: [`scripts/python/marco_pseudotime.py`](../scripts/python/marco_pseudotime.py).
+
+#### Cell Selection
+
+Each dataset was subset to myeloid lineage cells only before pseudotime computation:
+
+| Dataset | Myeloid types included | N cells | Cell type column |
+|---|---|---|---|
+| Gut Atlas | Monocyte, LYVE1 Macrophage, Macrophage, cycling DCs, cDC1, cDC2, pDC | 662 | `cell_type` |
+| SCP1845 | Classical monocytes, Nonclassical monocytes, Intermediate macrophages, Intestinal macrophages, Erythrophagocytic macrophages, Alveolar macrophages, Cycling, DC1, DC2, migDC, pDC | 1,081 | `Manually_curated_celltype` |
+| SCP259 | Macrophages, Inflammatory Monocytes, Cycling Monocytes, DC1, DC2 | 21,513 | `Cluster` |
+
+SCP1845 was further subset to gut-only organs (jejunal epithelium, lamina propria, ileum, caecum, sigmoid colon, transverse colon, duodenum) to avoid lung alveolar macrophages dominating the trajectory.
+
+#### Preprocessing Pipeline
+
+The following steps were applied sequentially to each myeloid subset:
+
+1. **Normalization check**: The script inspects a 100×100 sample of the expression matrix to determine if values are integer (raw counts) or floating-point (pre-normalized).
+   - Gut Atlas: pre-normalized (log-normalized values from h5ad)
+   - SCP1845: pre-normalized (downloaded normalized matrix)
+   - SCP259: raw counts → normalized to 10,000 counts per cell (`sc.pp.normalize_total(target_sum=1e4)`), then log-transformed (`sc.pp.log1p`)
+
+2. **Highly variable gene selection**: `sc.pp.highly_variable_genes(n_top_genes=2000, subset=True)` — selects the 2,000 most variable genes and subsets the matrix to only these genes. This removes noise from lowly-expressed/invariant genes.
+
+3. **PCA**: `sc.tl.pca(n_comps=30)` — computes 30 principal components on the HVG-subset matrix. The PCA is computed on the centered (but not scaled) expression matrix.
+
+4. **Nearest neighbor graph**: `sc.pp.neighbors(n_neighbors=15, n_pcs=30)` — builds a k-nearest-neighbor graph using Euclidean distance in PCA space. Each cell is connected to its 15 nearest neighbors. This graph is the foundation for UMAP, diffusion maps, and pseudotime.
+
+5. **UMAP**: `sc.tl.umap()` — computes 2D UMAP embedding from the neighbor graph for visualization. Default parameters: `min_dist=0.5`, `spread=1.0`, using the UMAP algorithm by McInnes et al.
+
+6. **Diffusion map**: `sc.tl.diffmap(n_comps=10)` — computes a diffusion map embedding with 10 components. The diffusion map represents the data as a Markov chain on the neighbor graph, where transition probabilities between cells capture gradual transcriptional changes. The eigenvectors of the transition matrix (diffusion components) capture the dominant axes of variation in a way that is robust to noise and preserves global structure — unlike UMAP which prioritizes local structure.
+
+#### Root Cell Selection
+
+DPT requires a root cell to anchor pseudotime at 0. The root was selected as follows:
+- From the specified root cell type (monocytes — the presumed starting point of the monocyte-to-macrophage trajectory)
+- Within that cell type, the cell with the **lowest MARCO expression** was chosen as root (since MARCO expression may indicate differentiation progress)
+
+Specific root types used:
+| Dataset | Root cell type | Root cell barcode |
+|---|---|---|
+| Gut Atlas | Monocyte | `GAGGTGATCGGCGGTT-1-4861STDY7208411` |
+| SCP1845 gut | Classical monocytes | `Pan_T8010319_AACCGCGTCTCGCATC` |
+| SCP259 | Inflammatory Monocytes | `N7.LPA.ATTCGGGAGAGGGT` |
+
+#### Diffusion Pseudotime Computation
+
+`sc.tl.dpt(adata)` — computes diffusion pseudotime from the root cell using the diffusion map. The algorithm:
+1. Uses the diffusion map components computed above
+2. Computes geodesic distances from the root cell through the diffusion space
+3. Assigns each cell a pseudotime value (0 = root, increasing = further from root)
+4. Cells unreachable from the root receive `inf` pseudotime (excluded from analysis)
+
+DPT was introduced by Haghverdi et al. (2016, *Nature Methods*) and is implemented in scanpy. It is robust to branching trajectories and noise compared to simple ordering methods.
+
+#### MARCO Expression Along Pseudotime
+
+After computing pseudotime, MARCO expression was analyzed along the trajectory:
+
+1. **Binning**: Pseudotime values were divided into 10 equal-frequency bins (deciles) using `pd.qcut`. Each bin contains approximately N/10 cells.
+
+2. **Per-bin statistics**: For each bin, the following were computed:
+   - N cells
+   - Mean MARCO expression
+   - % MARCO+ cells (expression > 0)
+   - Mean pseudotime value
+
+3. **MARCO+ vs MARCO- comparison**: Mann-Whitney U test (`scipy.stats.mannwhitneyu`, two-sided) comparing the pseudotime distributions of MARCO+ and MARCO- cells. This tests whether MARCO+ cells are significantly earlier or later in pseudotime.
+
+4. **Cell type ordering**: Mean and median pseudotime computed per cell type to establish the trajectory order (e.g., monocyte → macrophage → tissue-resident).
+
+5. **Disease stratification** (SCP259 only): Among MARCO+ cells, pseudotime was compared across `Health` categories (Healthy, Non-inflamed, Inflamed) to assess whether disease context shifts where MARCO+ cells appear on the trajectory.
+
+#### Output
+
+Each pseudotime analysis produces a CSV file with one row per cell containing:
+- `dpt_pseudotime`: diffusion pseudotime value
+- `umap_1`, `umap_2`: UMAP coordinates
+- `marco_expr`: MARCO expression level
+- `marco_status`: MARCO+ or MARCO-
+- Cell type label (column name varies by dataset)
+
+#### Limitations
+
+- **DPT assumes a continuous trajectory**: If myeloid differentiation involves discrete jumps or multiple independent origins, DPT may not capture the true topology. PAGA (partition-based graph abstraction) could complement this analysis.
+- **Root cell sensitivity**: Pseudotime ordering depends on the choice of root cell. Different root cells within the same monocyte cluster could produce slightly different orderings, though the overall trajectory structure is robust.
+- **No RNA velocity**: scVelo-based RNA velocity would provide directional information (confirming monocyte→macrophage rather than the reverse), but requires spliced/unspliced count matrices not available in these downloads. The monocyte→macrophage direction is assumed based on established biology.
+- **SCP259 uses raw counts**: Unlike the other datasets which use pre-normalized data, SCP259 was normalized in-script. This means the absolute pseudotime values are not directly comparable across datasets — only the relative ordering and MARCO distribution patterns are meaningful.
+- **SCP1845 gut subset is small**: Only 1,081 gut myeloid cells (vs 50,082 total myeloid across all organs). Some rare cell types (e.g., Intermediate macrophages, n=3) may not be reliably positioned on the trajectory.
+- **Visium spatial data (SCP2771) excluded**: Pseudotime was not computed on Visium spots because each spot captures ~5-10 cells. Pseudotime requires single-cell resolution to order individual cells along a trajectory.
+
 ### Software Versions
 - Python 3.9
 - scanpy 1.10.3
 - gseapy (latest via pip)
-- scipy (for mmread)
+- scipy (for mmread, mannwhitneyu)
 - pandas, numpy
 
 ---
