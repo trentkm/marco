@@ -2,7 +2,7 @@
 
 ## Overview
 
-MARCO (Macrophage Receptor with Collagenous Structure) is a class A scavenger receptor. This analysis surveyed MARCO/Marco expression across 6 single-cell/spatial transcriptomic datasets from human and mouse colon tissue.
+MARCO (Macrophage Receptor with Collagenous Structure) is a class A scavenger receptor. This analysis surveyed MARCO/Marco expression across 7 single-cell/spatial transcriptomic datasets from human and mouse colon tissue.
 
 ---
 
@@ -16,6 +16,7 @@ MARCO (Macrophage Receptor with Collagenous Structure) is a class A scavenger re
 | SCP2760 | Mayassi et al., *Nature*, 2024 | Mouse | scRNA-seq | Colon | Normal (SPF/GF/FMT) | 234,490 |
 | SCP2771 | Mayassi et al., *Nature*, 2024 | Mouse | 10x Visium | Colon | DSS colitis | 13,159 spots |
 | Gut Atlas | James et al., *Nat Immunol*, 2020 | Human | scRNA-seq | Colon | Normal | 41,650 |
+| GSE237862 | Stavely et al., *Inflamm Bowel Dis*, 2025 | Mouse | 10x Chromium | Colon (muscularis propria) | Normal/DSS colitis | 22,893 |
 
 ### Paper Details
 
@@ -28,6 +29,8 @@ MARCO (Macrophage Receptor with Collagenous Structure) is a class A scavenger re
 **Mayassi et al. 2024** — "Spatially restricted immune and microbiota-driven adaptation of the gut." DSS colitis model with timepoints D0/D12/D30/D73. Found ILC2-mediated middle colon adaptation. SCP2760 = scRNA-seq, SCP2771 = Visium spatial. MARCO not discussed. DOI: 10.1038/s41586-024-08216-z
 
 **James et al. 2020** — "Distinct microbial and immune niches of the human colon." 5 donors, 4 colon regions. Identified LYVE1+ macrophages. MARCO not discussed in this paper, but a follow-up study (Domanska et al., *J Exp Med*, 2022) found MARCO+/LYVE1+ muscularis macrophages in the colon. DOI: 10.1038/s41590-020-0602-z
+
+**Stavely et al. 2025** — "Resolving Resident Colonic Muscularis Macrophage Diversity and Plasticity During Colitis." Isolated colonic muscularis propria from naive and DSS-treated B6 mice (2.5% DSS, 7 days). Identified two macrophage subsets: conventional Cx3cr1+ and Lyve1+/CD163+ macrophages. Found that the anti-inflammatory Lyve1+ population disappears during colitis while resident Cx3cr1+ macrophages persist and shift toward inflammatory characteristics. Lineage tracing confirmed resident macrophages remain during colitis and aren't entirely replaced by infiltrating cells. Validated in human UC. MARCO not discussed. DOI: 10.1093/ibd/izae155
 
 ---
 
@@ -63,6 +66,11 @@ Across all datasets, MARCO expression is overwhelmingly restricted to myeloid li
 | **SCP2760** | cDC2s | 743 | 0.7% | 0.012 | 3.0 |
 | **SCP2760** | Ccl2/Ccl7-hi MACS | 505 | 0.2% | 0.010 | 5.0 |
 | **SCP2038** | Macrophages | 284 | 0.4% | 0.004 | 1.0 |
+| **GSE237862** | Cx3cr1+ macrophages (naive) | 138 | **15.2%** | 0.359 | 3.83 |
+| **GSE237862** | Cx3cr1+ macrophages (DSS) | 2,001 | **10.6%** | 0.186 | 5.43 |
+| **GSE237862** | Monocytes (DSS) | 1,863 | 2.3% | 0.024 | 2.28 |
+| **GSE237862** | Lyve1+ macrophages (naive) | 3,981 | 1.3% | 0.011 | 2.30 |
+| **GSE237862** | Lyve1+ macrophages (DSS) | 360 | 1.4% | 0.020 | 2.63 |
 
 ---
 
@@ -88,6 +96,83 @@ MARCO is elevated ~15x in UC tissue vs healthy, present in both inflamed and non
 | D73 (late recovery) | 3,247 | 0.1% | 0.001 | 1 |
 
 Marco expression spikes ~90x at D12 (active inflammation), then returns to baseline by D30. Spatial coordinates for 320 Marco+ spots saved in `scp2771_marco_spatial.csv`.
+
+### Mouse DSS Colitis — Muscularis Propria scRNA-seq (GSE237862)
+
+This dataset specifically isolates the **muscularis propria** — the tissue layer where MARCO+/LYVE1+ macrophages are known to reside (Domanska et al. 2022). Unlike the mucosal-focused datasets above, this captures the muscle-layer macrophage populations directly.
+
+| Treatment | N macrophages | % Marco+ | Mean Expr | p-value |
+|---|---|---|---|---|
+| Naive | 4,119 | **1.8%** | 0.023 | — |
+| DSS | 2,361 | **9.2%** | 0.161 | 4.28e-44 |
+
+Marco expression increases **~5x** in muscularis macrophages during DSS colitis (Mann-Whitney p=4.28e-44). This is a **muscularis-specific** inflammation signal, distinct from the mucosal spatial signal in SCP2771.
+
+**By macrophage subtype:**
+
+| Subtype | Treatment | N cells | % Marco+ | Mean Expr |
+|---|---|---|---|---|
+| Cx3cr1+ macrophage | Naive | 138 | **15.2%** | 0.359 |
+| Cx3cr1+ macrophage | DSS | 2,001 | **10.6%** | 0.186 |
+| Lyve1+ macrophage | Naive | 3,981 | 1.3% | 0.011 |
+| Lyve1+ macrophage | DSS | 360 | 1.4% | 0.020 |
+
+Key observations:
+1. **Marco is a Cx3cr1+ macrophage marker**, not a Lyve1+ marker in the muscularis — opposite to what was expected from Domanska et al. 2022 which associated MARCO with LYVE1+ macrophages
+2. **Lyve1+ macrophages collapse during DSS**: 3,981 → 360 cells (91% reduction), confirming the paper's finding that the anti-inflammatory Lyve1+ population disappears during colitis
+3. **Cx3cr1+ macrophages expand during DSS**: 138 → 2,001 cells (14.5x expansion), consistent with monocyte-derived macrophage influx
+4. Marco+ rate is **higher in naive Cx3cr1+ macrophages** (15.2%) than in DSS (10.6%), suggesting Marco marks a constitutive subset of conventional muscularis macrophages that gets diluted by the massive influx of new monocyte-derived cells during inflammation
+
+**Sex difference**: Male mice showed dramatically higher Marco expression (3.2% overall) vs female (0.3%), driven primarily by the male DSS sample (4.6% Marco+ vs 0.04% in female DSS). This may reflect sex-specific inflammatory responses in the muscularis.
+
+**Lyve1 expression dynamics in macrophages:**
+
+| Treatment | % Lyve1+ macrophages | Mean Lyve1 |
+|---|---|---|
+| Naive | 63.8% | 1.297 |
+| DSS | 9.2% | 0.121 |
+
+Lyve1 expression collapses ~14x in macrophages during DSS — the Lyve1+ population doesn't just shrink in number, the remaining macrophages also downregulate Lyve1.
+
+**Co-expression profile of Marco+ muscularis macrophages:**
+
+Marco+ macrophages in the muscularis show a distinct profile compared to Marco- macrophages:
+
+| Feature | Marco+ | Marco- | Direction |
+|---|---|---|---|
+| Lyve1 | 0.40 | 0.89 | **DOWN** (p=3.2e-13) |
+| Cd163 | 0.41 | 0.94 | **DOWN** (p=3.6e-15) |
+| Mrc1 (CD206) | 0.97 | 2.01 | **DOWN** (p=2.0e-31) |
+| Cx3cr1 | 0.27 | 0.72 | **DOWN** (p=3.5e-13) |
+| Msr1 (CD204) | 1.30 | 0.53 | **UP** (p=1.4e-55) |
+| Timd4 | 0.46 | 0.20 | **UP** (p=1.6e-16) |
+| Adgre1 (F4/80) | 1.71 | 1.23 | **UP** (p=4.0e-17) |
+| Il1b | 1.95 | 1.30 | **UP** (p=8.6e-13) |
+| Tnf | 1.94 | 1.12 | **UP** (p=1.4e-28) |
+| Il6 | 1.14 | 0.21 | **UP** (p=2.9e-73) |
+| Il10 | 0.67 | 0.43 | **UP** (p=3.2e-6) |
+| Mertk | 0.53 | 0.34 | **UP** (p=2.9e-9) |
+| H2-Ab1 (MHC-II) | 1.36 | 2.57 | **DOWN** (p=8.8e-38) |
+| C1qa | 3.12 | 2.72 | ns |
+
+Marco+ muscularis macrophages are **Msr1+/Timd4+/F4/80-hi/IL-6-hi/TNF-hi** but **Lyve1-lo/Cd163-lo/Mrc1-lo/MHC-II-lo** — a pro-inflammatory, tissue-resident profile distinct from the Lyve1+ anti-inflammatory population. The co-expression with Timd4 suggests embryonic origin (yolk sac-derived), while the high Msr1 indicates shared scavenger receptor identity.
+
+**Top DE genes in Marco+ vs Marco- muscularis macrophages:**
+
+| Gene | logFC | Function |
+|---|---|---|
+| Saa3 | +188.5 | Serum amyloid A3 (acute phase) |
+| Fn1 | +66.6 | Fibronectin (tissue remodeling) |
+| Thbs1 | +55.9 | Thrombospondin-1 (anti-angiogenic, TGF-β activation) |
+| Serpinb2 | +29.4 | PAI-2 (protease inhibitor) |
+| Cxcl13 | +28.9 | B cell chemoattractant |
+| Il1a | +8.9 | Alarmin |
+| Arg1 | +10.1 | Arginase-1 (immunomodulatory) |
+| Tgfb2 | +7.6 | TGF-β2 (anti-inflammatory) |
+| Il6 | — | Pro-inflammatory cytokine (see above) |
+| Mrc1 | -10.0 | Mannose receptor (DOWN) |
+| Retnla | -16.4 | Resistin-like alpha (DOWN — tissue-resident marker) |
+| Maf | -7.8 | Transcription factor (DOWN — tissue-resident) |
 
 ---
 
@@ -245,17 +330,18 @@ This explains why:
 
 ## Summary
 
-1. **MARCO is myeloid-restricted** across all 6 datasets — primarily macrophages and monocytes
+1. **MARCO is myeloid-restricted** across all 7 datasets — primarily macrophages and monocytes
 2. **In humans**: highest in LYVE1+ tissue-resident macrophages (muscularis type) and monocytes; much lower in lamina propria macrophages
-3. **In mice**: very low at baseline, but **dramatic upregulation during active colitis** (D12 DSS = 9% of spatial spots, vs 0.1% baseline)
-4. **Species difference**: human colon macrophages show moderate constitutive MARCO expression; mouse colon macrophages show near-zero baseline but inflammation-inducible expression
+3. **In mice**: very low in mucosal datasets at baseline, but **constitutively expressed in muscularis Cx3cr1+ macrophages** (15.2% Marco+ in naive muscularis, GSE237862) and **dramatically upregulated during active colitis** (D12 DSS = 9% of spatial spots in SCP2771; 9.2% of muscularis macrophages in GSE237862)
+4. **Species difference**: human colon macrophages show moderate constitutive MARCO expression; mouse colon macrophages show tissue-layer-dependent expression — near-zero in mucosa but ~15% in muscularis Cx3cr1+ macrophages
 5. **Organ hierarchy**: lung >> liver >> blood/spleen >> gut >> lymph nodes
-6. **Disease relevance**: MARCO is elevated in UC tissue and spikes during DSS colitis peak — suggesting MARCO marks inflammation-recruited or -activated myeloid cells
-7. **No prior papers** in this analysis explicitly discussed MARCO, but Domanska et al. 2022 provides the key biological framework
+6. **Disease relevance**: MARCO is elevated in UC tissue and spikes during DSS colitis peak — suggesting MARCO marks inflammation-recruited or -activated myeloid cells. In the muscularis, the Lyve1+ anti-inflammatory macrophage population collapses during DSS (91% reduction) while Marco+ Cx3cr1+ macrophages expand.
+7. **Muscularis specificity (GSE237862)**: Marco marks **Cx3cr1+ conventional macrophages** in the muscularis, not the Lyve1+/CD163+ population — opposite to expectations from Domanska et al. 2022. Marco+ muscularis macrophages are Msr1+/Timd4+/F4/80-hi/IL-6-hi/TNF-hi but Lyve1-lo/Cd163-lo/MHC-II-lo.
+8. **No prior papers** in this analysis explicitly discussed MARCO, but Domanska et al. 2022 and Stavely et al. 2025 provide the key biological framework for muscularis macrophage biology
 
 ## Differential Expression: MARCO+ vs MARCO- Myeloid Cells
 
-DE analysis was performed on 4 datasets with sufficient MARCO+ cells (Wilcoxon rank-sum, padj < 0.05, |logFC| > 0.25). Full methods in [methodology.md](methodology.md). Scripts: [`marco_de_pathways.py`](../scripts/python/marco_de_pathways.py).
+DE analysis was performed on 5 datasets with sufficient MARCO+ cells (Wilcoxon rank-sum, padj < 0.05, |logFC| > 0.25). Full methods in [methodology.md](methodology.md). Scripts: [`marco_de_pathways.py`](../scripts/python/marco_de_pathways.py), [`gse237862_marco_analysis.py`](../scripts/python/gse237862_marco_analysis.py).
 
 ### DE Summary by Dataset
 
@@ -265,6 +351,7 @@ DE analysis was performed on 4 datasets with sufficient MARCO+ cells (Wilcoxon r
 | SCP1845 | 50,082 | 25,303 | 24,779 | 5,921 | 1,649 |
 | SCP259 | 21,513 | 526 | 20,987 | 389 | 155 |
 | SCP2771 (D12 spots) | 3,495 | 315 | 3,180 | 3,324 | 213 |
+| GSE237862 (muscularis macs) | 6,480 | 291 | 6,189 | 647 | 325 |
 
 ### Consistently Co-upregulated with MARCO
 
@@ -276,20 +363,26 @@ DE analysis was performed on 4 datasets with sufficient MARCO+ cells (Wilcoxon r
 | **VCAN** | Versican (ECM, monocyte recruitment) | Gut Atlas, SCP259 |
 | **TYROBP/DAP12** | Myeloid signaling adaptor | Gut Atlas, SCP259, SCP2771 |
 | **C5AR1** | Complement C5a receptor | Gut Atlas |
-| **MSR1** | Scavenger receptor A (CD204) | SCP1845 |
+| **MSR1** | Scavenger receptor A (CD204) | SCP1845, GSE237862 |
 | **MRC1/CD206** | Mannose receptor (M2 macrophage marker) | SCP1845 |
+| **Saa3** | Serum amyloid A3 (acute phase) | SCP2771, GSE237862 |
 | **TSPO** | Translocator protein (inflammation) | Gut Atlas, SCP259 |
 | **SERPINA1** | Alpha-1 antitrypsin | Gut Atlas, SCP259 |
 | **EMP3** | Epithelial membrane protein 3 | Gut Atlas, SCP259 |
-| **Il1b** | Pro-inflammatory cytokine | SCP2771 (mouse, D12) |
+| **Il1b** | Pro-inflammatory cytokine | SCP2771 (mouse, D12), GSE237862 |
 | **Cxcl9/Cxcl10** | IFN-γ-induced chemokines | SCP2771 (mouse, D12) |
-| **Saa3** | Serum amyloid A3 (acute phase) | SCP2771 (mouse, D12) |
+| **Fn1** | Fibronectin (tissue remodeling) | GSE237862 |
+| **Thbs1** | Thrombospondin-1 (TGF-β activation) | GSE237862 |
+| **Cxcl13** | B cell chemoattractant | GSE237862 |
+| **Arg1** | Arginase-1 (immunomodulatory) | GSE237862 |
+| **Il6** | Pro-inflammatory cytokine | GSE237862 |
+| **Timd4** | Phosphatidylserine receptor (tissue-resident marker) | GSE237862 |
 
 ### Consistently Downregulated in MARCO+ Cells
 
 | Gene | Function | Datasets Found |
 |---|---|---|
-| **HLA-DRA, HLA-DRB1, HLA-DPA1, HLA-DQA1** etc. | MHC class II (antigen presentation) | Gut Atlas, SCP259, SCP1845 |
+| **HLA-DRA, HLA-DRB1, HLA-DPA1, HLA-DQA1** / H2-Ab1/Aa/Eb1 | MHC class II (antigen presentation) | Gut Atlas, SCP259, SCP1845, GSE237862 |
 | **C1QA/B/C** | Complement C1q subunits | SCP259 |
 | **DNASE1L3** | DNase I-like 3 | Gut Atlas, SCP259 |
 | **IGF1** | Insulin-like growth factor 1 | Gut Atlas, SCP259 |
@@ -554,3 +647,4 @@ The pseudotime analysis reveals that MARCO expression follows a **context-depend
 5. James KR et al. Nat Immunol. 2020;21(3):343-353. DOI: 10.1038/s41590-020-0602-z
 6. Elmentaite R et al. Nature. 2021;597(7875):250-255. DOI: 10.1038/s41586-021-03852-1
 7. Domanska D et al. J Exp Med. 2022;219(3):e20211846. DOI: 10.1084/jem.20211846
+8. Stavely R et al. Inflamm Bowel Dis. 2025;31(1):151-168. DOI: 10.1093/ibd/izae155

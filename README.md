@@ -13,12 +13,14 @@ Investigating MARCO (macrophage scavenger receptor) expression across single-cel
 │   └── python/               # Analysis scripts
 │       ├── marco_expression.py    # Expression extraction
 │       ├── marco_de_pathways.py   # DE + pathway enrichment
-│       └── marco_pseudotime.py    # Pseudotime analysis
+│       ├── marco_pseudotime.py    # Pseudotime analysis
+│       └── gse237862_marco_analysis.py  # Muscularis macrophage analysis
 ├── smillie2019/              # Original Smillie et al. 2019 paper code (SCP259)
 ├── data/                     # Not tracked
 │   ├── seurat/               # Seurat .rds objects
 │   ├── single-cell-portal/   # SCP259, SCP1845, SCP2038, SCP2760, SCP2771
-│   └── gut-atlas/            # Gut Cell Atlas h5ad + metadata
+│   ├── gut-atlas/            # Gut Cell Atlas h5ad + metadata
+│   └── gse237862/            # Stavely et al. 2025 muscularis propria
 ├── objectives/               # Goals, plans, and context docs
 └── .gitignore
 ```
@@ -33,6 +35,7 @@ Investigating MARCO (macrophage scavenger receptor) expression across single-cel
 | Mayassi et al. 2024 | SCP2760 | Mouse | Colon | No | Normal |
 | Mayassi et al. 2024 | SCP2771 | Mouse | Colon | Visium | DSS colitis |
 | James et al. 2020 | — | Human | Colon | No | Normal |
+| Stavely et al. 2025 | GSE237862 | Mouse | Colon (muscularis propria) | No | Normal/DSS colitis |
 
 ## Original Paper
 

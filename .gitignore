@@ -2,6 +2,7 @@
 data/seurat/*.rds
 data/gut-atlas/*.h5ad
 data/single-cell-portal/
+data/gse237862/
 *.mtx
 *.mtx.gz
 *.h5ad
