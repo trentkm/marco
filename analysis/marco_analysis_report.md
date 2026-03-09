@@ -32,11 +32,32 @@ MARCO (Macrophage Receptor with Collagenous Structure) is a class A scavenger re
 
 **Stavely et al. 2025** — "Resolving Resident Colonic Muscularis Macrophage Diversity and Plasticity During Colitis." Isolated colonic muscularis propria from naive and DSS-treated B6 mice (2.5% DSS, 7 days). Identified two macrophage subsets: conventional Cx3cr1+ and Lyve1+/CD163+ macrophages. Found that the anti-inflammatory Lyve1+ population disappears during colitis while resident Cx3cr1+ macrophages persist and shift toward inflammatory characteristics. Lineage tracing confirmed resident macrophages remain during colitis and aren't entirely replaced by infiltrating cells. Validated in human UC. MARCO not discussed. DOI: 10.1093/ibd/izae155
 
+### Tissue Collection & Processing Methods
+
+Understanding which colon layers each dataset captures is critical for interpreting MARCO results, since MARCO+/LYVE1+ macrophages reside in the **muscularis propria** (Domanska et al. 2022), not the mucosal lamina propria.
+
+| Dataset | Layers Captured | Collection Method | Fractionated? | Inflammation Status | Muscularis Captured? |
+|---|---|---|---|---|---|
+| **SCP259** | Mucosa only (epithelium + LP) | Endoscopic biopsy | Yes — EDTA epithelial strip → Liberase TM + DNase I digestion of LP | Healthy / UC non-inflamed / UC inflamed | **No** |
+| **SCP1845** | Uncertain (likely mucosa-dominated) | Surgical excision from deceased organ donors | Jejunum split EPI/LP; colon digested as bulk tissue (Liberase TL + DNase, GentleMACS) | Healthy | **Uncertain** |
+| **SCP2038** | Full-thickness | Mouse dissection, whole tissue digested | No — whole tissue Liberase TM + DNase I digestion | Normal / CRC | **Theoretically yes**, but very poor yield (4 Marco+ cells) |
+| **SCP2760** | Epithelium + LP only | Mouse dissection | Yes — EDTA epithelial strip → Collagenase VIII digestion → 30%/70% Percoll gradient for immune enrichment | SPF / GF / FMT (no colitis) | **No** — muscularis discarded |
+| **SCP2771** | Full-thickness (all layers) | Mouse dissection, Swiss-roll sections | No — Visium spatial preserves intact tissue architecture from serosa to epithelium | DSS colitis: D0, D12, D30, D73 | **Yes** |
+| **Gut Atlas** | Mucosa (LP) | Surgical excision from deceased organ donors | Yes — EDTA + DTT epithelial strip → Liberase TL + DNase I → Percoll/Ficoll mononuclear enrichment | Healthy | **No** — explicitly "mucosal tissue" |
+| **GSE237862** | **Muscularis propria only** | Mouse dissection | Yes — mucosa/submucosa **peeled away under dissection microscope**, muscularis digested with Collagenase XI + Dispase (45 min, 37°C), 35 µm mesh | Naive / DSS (2.5%, 7 days) | **Yes — exclusively** |
+
+**Key implication**: Of 7 datasets, only 3 have any chance of capturing muscularis macrophages: SCP2038 (full-thickness but very low yield), SCP2771 (Visium spatial, full-thickness), and GSE237862 (muscularis-only, gold standard). The remaining 4 datasets use protocols that explicitly target or enrich for mucosa/lamina propria, explaining why MARCO detection is very low or absent — they are systematically missing the tissue layer where MARCO+ macrophages reside.
+
 ---
 
 ## Key Finding: MARCO is Myeloid-Restricted
 
 Across all datasets, MARCO expression is overwhelmingly restricted to myeloid lineage cells (macrophages, monocytes, some DCs). Non-myeloid expression is negligible (<0.1%).
+
+**Table metric definitions:**
+- **% MARCO+**: Percentage of cells *within that specific cell type* that have detectable MARCO expression (expression > 0). E.g., "93.7%" means 93.7% of alveolar macrophages express MARCO.
+- **Mean Expr**: Mean log-normalized expression across all cells of that type (including non-expressors). Units are `ln(1 + normalized_count)` after library-size normalization to 10,000 counts per cell. These are unitless — not TPM or raw UMI counts. A value of ~3.0 ≈ 19 normalized counts; ~5.0 ≈ 147 normalized counts.
+- **Max**: Highest single-cell expression value observed in that group, same log-normalized units.
 
 ### Human — Cell Type Breakdown
 
@@ -354,6 +375,8 @@ DE analysis was performed on 5 datasets with sufficient MARCO+ cells (Wilcoxon r
 | GSE237862 (muscularis macs) | 6,480 | 291 | 6,189 | 647 | 325 |
 
 ### Consistently Co-upregulated with MARCO
+
+These are genes that are **upregulated on MARCO+ cells themselves** compared to MARCO- cells of the same lineage (myeloid-to-myeloid comparison via DE testing: MARCO+ macrophages/monocytes vs MARCO- macrophages/monocytes within each dataset). They are NOT genes in neighboring cell types — for spatial co-localization with other cell types, see the "Spatial Neighborhood Analysis" section.
 
 | Gene | Function | Datasets Found |
 |---|---|---|
